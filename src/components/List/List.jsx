@@ -1,6 +1,7 @@
 import React from 'react';
 import Item from '../Item/Item';
 import './List.css';
+import PropTypes from 'prop-types'
 
 const List = ({ contacts, onDelete, onAddContact, onSelectContact }) => {
   return (
@@ -19,5 +20,16 @@ const List = ({ contacts, onDelete, onAddContact, onSelectContact }) => {
     </div>
   );
 }
+
+List.propTypes = {
+  contacts: PropTypes.array,
+  onDelete: PropTypes.func.isRequired,
+  onAddContact: PropTypes.func.isRequired,
+  onSelectContact: PropTypes.func.isRequired
+};
+
+List.defaultProps = {
+  contacts: []
+};
 
 export default List;

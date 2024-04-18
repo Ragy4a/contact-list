@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './Form.css';
+import PropTypes from 'prop-types';
 
 const Form = ({ editingContact, onSave, onDelete, onCreateEmptyContact }) => {
   const [contact, setContact] = useState({ ...editingContact });
@@ -98,5 +99,12 @@ const Form = ({ editingContact, onSave, onDelete, onCreateEmptyContact }) => {
     </>
   );
 }
+
+Form.propTypes = {
+  editingContact: PropTypes.object.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onCreateEmptyContact: PropTypes.func.isRequired
+};
 
 export default Form;
