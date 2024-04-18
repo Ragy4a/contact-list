@@ -1,118 +1,89 @@
-import { Component } from 'react'
-import List from './components/List/List'
-import Form from './components/Form/Form'
-import './App.css'
-import { nanoid } from 'nanoid'
+import { useState, useEffect } from 'react';
+import List from './components/List/List';
+import Form from './components/Form/Form';
+import './App.css';
+import { nanoid } from 'nanoid';
 
-export class App extends Component {
+const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [editingContact, setEditingContact] = useState(createEmptyContact());
 
-  state = {
-    contacts: [],
-    editingContact: this.createEmptyContact(),
+  function createEmptyContact() {
+    return { 
+      id: null, 
+      fName: '', 
+      lName: '', 
+      email: '', 
+      phone: '' 
+    };
   }
 
-  createEmptyContact () {
-    return {
-      id: null,
-      fName: '',
-      lName: '',
-      email: '',
-      phone: '',
-    }
-  }
+  useEffect(() => {
+    const contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+    setContacts(contacts);
+  }, []);
 
-  componentDidMount () {
-    const contacts = JSON.parse(localStorage.getItem('contacts'));
-    if(!contacts) {
-      this.setState({
-        contacts: [],
-      })
-    } else {
-      this.setState({
-        contacts: [...contacts],
-      })
-    }
-  }
-
-  saveContactsToLocalStorage (contacts) {
+  function saveContactsToLocalStorage(contacts) {
     localStorage.setItem('contacts', JSON.stringify(contacts));
   }
 
-  addNewContact = () => {
-    this.setState({
-      editingContact: this.createEmptyContact()
-    })
+  const addNewContact = () => {
+    setEditingContact(createEmptyContact());
   }
 
-  selectContact = (contact) => {
-    this.setState({
-      editingContact: contact,
-    })
+  const selectContact = (contact) => {
+    setEditingContact(contact);
   }
 
-  createContact = (contact) => {
-    contact.id = nanoid();
-    const contacts = [...this.state.contacts, contact]
-    this.saveContactsToLocalStorage(contacts)
-    this.setState({
-      contacts: contacts,
-      editingContact: this.createEmptyContact(),
-    })
+  const createContact = (newContact) => {
+    newContact.id = nanoid();
+    const updatedContacts = [...contacts, newContact];
+    saveContactsToLocalStorage(updatedContacts);
+    setContacts(updatedContacts);
+    setEditingContact(createEmptyContact());
   }
 
-  updateContact = (contact) => {
-    this.setState((state) => {
-      const contacts = state.contacts.map(c => 
-        c.id === contact.id ? contact : c
-      )
-      this.saveContactsToLocalStorage(contacts);
-      return {
-        contacts,
-        editingContact: contact,
-      }
-    })
+  const updateContact = (updatedContact) => {
+    const updatedContacts = contacts.map(c => c.id === updatedContact.id ? updatedContact : c);
+    saveContactsToLocalStorage(updatedContacts);
+    setContacts(updatedContacts);
+    setEditingContact(updatedContact);
   }
 
-  deleteContact = (id) => {
-    const contacts = [...this.state.contacts.filter((contacts) => contacts.id !== id)]
-    this.setState({
-      contacts: contacts,
-    })
-    this.saveContactsToLocalStorage(contacts)
+  const deleteContact = (id) => {
+    const updatedContacts = contacts.filter(c => c.id !== id);
+    setContacts(updatedContacts);
+    saveContactsToLocalStorage(updatedContacts);
   }
 
-  saveContact = (contact) => {
+  const saveContact = (contact) => {
     if (!contact.id) {
-      this.createContact(contact);
+      createContact(contact);
     } else {
-      this.updateContact(contact);
+      updateContact(contact);
     }
   }
 
-  render() {
-    return (
-      <>
-        <div className="project-container">
-          <h2>Contact list</h2>
-          <div className="wrapper">
-            <List
-              contacts={this.state.contacts}
-              onDelete={this.deleteContact}
-              onAddContact={this.addNewContact}
-              onSelectContact={this.selectContact}
-            />
-            <Form
-              key={this.state.editingContact.id}
-              editingContact={this.state.editingContact}
-              onSave={this.saveContact}
-              onDelete={this.deleteContact}
-              onCreateEmptyContact={this.createEmptyContact}
-            />
-          </div>
-        </div>
-      </>
-    )
-  }
+  return (
+    <div className="project-container">
+      <h2>Contact list</h2>
+      <div className="wrapper">
+        <List
+          contacts={contacts}
+          onDelete={deleteContact}
+          onAddContact={addNewContact}
+          onSelectContact={selectContact}
+        />
+        <Form
+          key={editingContact.id}
+          editingContact={editingContact}
+          onSave={saveContact}
+          onDelete={deleteContact}
+          onCreateEmptyContact={createEmptyContact}
+        />
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;

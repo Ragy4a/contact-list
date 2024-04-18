@@ -1,107 +1,102 @@
-import { Component } from 'react'
-import './Form.css'
+import { useState, useEffect } from 'react';
+import './Form.css';
 
-export class Form extends Component {
+const Form = ({ editingContact, onSave, onDelete, onCreateEmptyContact }) => {
+  const [contact, setContact] = useState({ ...editingContact });
 
-  state = {
-    ...this.props.editingContact
+  useEffect(() => {
+    setContact({ ...editingContact });
+  }, [editingContact]);
+
+  const onInputChange = (event) => {
+    setContact({ 
+      ...contact, 
+      [event.target.name]: event.target.value 
+    });
   }
 
-  onInputChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    })
-  }
-
-  onClearInput = (event) => {
+  const onClearInput = (event) => {
     const sibling = event.target.previousSibling;
-    this.setState({
+    setContact({ 
+      ...contact, 
       [sibling.name]: '',
-    })
-  } 
-
-  onContactDelete = () => {
-    this.props.onDelete(this.props.editingContact.id);
-    this.setState({
-      ...this.props.onCreateEmptyContact(),
-    })
+    });
   }
 
-  onFormSubmit = (event) => {
+  const onContactDelete = () => {
+    onDelete(contact.id);
+    setContact(onCreateEmptyContact());
+  }
+
+  const onFormSubmit = (event) => {
     event.preventDefault();
-    this.props.onSave({
-      ...this.state,
-    })
-    if (!this.state.id) {
-      this.setState({
-        ...this.props.onCreateEmptyContact(),
-      })
+    onSave(contact);
+    if (!contact.id) {
+      setContact(onCreateEmptyContact());
     }
   }
 
-  render() {
-    const isEditing = this.state.id !== null;
-    return (
-        <>
-            <form onSubmit={this.onFormSubmit}>
-                <div className="input-container">
-                  <div className="wrapper-input">
-                    <input 
-                    type="text" 
-                    placeholder='First Name'
-                    name='fName'
-                    value={this.state.fName}
-                    onChange={this.onInputChange}
-                    />
-                    <span
-                    onClick={this.onClearInput}
-                    >X</span>
-                    </div>
-                  <div className="wrapper-input">
-                    <input 
-                    type="text" 
-                    placeholder='Last Name'
-                    name='lName'
-                    value={this.state.lName}
-                    onChange={this.onInputChange}/>
-                    <span
-                    onClick={this.onClearInput}
-                    >X</span>
-                  </div>
-                  <div className="wrapper-input">
-                    <input 
-                    type="email" 
-                    name="email" 
-                    id="email" 
-                    placeholder='Email Adress'
-                    value={this.state.email}
-                    onChange={this.onInputChange}/>
-                    <span
-                    onClick={this.onClearInput}
-                    >X</span>
-                  </div>
-                  <div className="wrapper-input">
-                    <input 
-                    type="text" 
-                    placeholder='Phone Number'
-                    name='phone'
-                    value={this.state.phone}
-                    onChange={this.onInputChange}/>
-                    <span
-                    onClick={this.onClearInput}
-                    >X</span>
-                  </div>
+  const isEditing = contact.id !== null;
+  return (
+    <>
+        <form onSubmit={onFormSubmit}>
+            <div className="input-container">
+              <div className="wrapper-input">
+                <input 
+                type="text" 
+                placeholder='First Name'
+                name='fName'
+                value={contact.fName}
+                onChange={onInputChange}
+                />
+                <span
+                onClick={onClearInput}
+                >X</span>
                 </div>
-                <div className="btn-container">
-                    <button type='submit'>Save</button>
-                    {isEditing && (
-                      <button onClick={this.onContactDelete}>Delete</button>
-                    )}
-                </div>
-            </form>
-        </>
-    )
-  }
+              <div className="wrapper-input">
+                <input 
+                type="text" 
+                placeholder='Last Name'
+                name='lName'
+                value={contact.lName}
+                onChange={onInputChange}/>
+                <span
+                onClick={onClearInput}
+                >X</span>
+              </div>
+              <div className="wrapper-input">
+                <input 
+                type="email" 
+                name="email" 
+                id="email" 
+                placeholder='Email Address'
+                value={contact.email}
+                onChange={onInputChange}/>
+                <span
+                onClick={onClearInput}
+                >X</span>
+              </div>
+              <div className="wrapper-input">
+                <input 
+                type="text" 
+                placeholder='Phone Number'
+                name='phone'
+                value={contact.phone}
+                onChange={onInputChange}/>
+                <span
+                onClick={onClearInput}
+                >X</span>
+              </div>
+            </div>
+            <div className="btn-container">
+                <button type='submit'>Save</button>
+                {isEditing && (
+                  <button onClick={onContactDelete}>Delete</button>
+                )}
+            </div>
+        </form>
+    </>
+  );
 }
 
-export default Form
+export default Form;
