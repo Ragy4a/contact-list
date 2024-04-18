@@ -1,0 +1,12 @@
+.list {
+    width: 50%;
+    height: 100%;
+}
+
+.contacts {
+    height: 85%;
+}
+
+#create-new {
+    margin-left: -10dvw;
+}

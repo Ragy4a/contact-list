@@ -1,0 +1,33 @@
+form {
+    width: 50%;
+    height: 100%;
+}
+
+.input-container {
+    height: 80%;
+}
+
+.wrapper-input {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+form input {
+    padding: 10px; 
+}
+
+.wrapper-input > span {
+    border-radius: 5px;
+    display: block;
+    height: 39px;
+    width: 40px;
+    font-size: 1.7rem;
+    cursor: pointer;
+    background-color: red;
+}
+
+.btn-container :first-child {
+    margin-left: -180px;
+}
+
