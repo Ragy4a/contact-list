@@ -15,6 +15,7 @@ module.exports = {
     'eslint-disable react/prop-types': 'on',
     'react/jsx-no-target-blank': 'off',
     'no-unused-vars': 'warn',
+    'react-hooks/exhaustive-deps': 'off',
 
     'react-refresh/only-export-components': [
       'warn',

@@ -3,6 +3,7 @@ import List from './components/List/List';
 import Form from './components/Form/Form';
 import './App.css';
 import { nanoid } from 'nanoid';
+import api from './api/contacts-service'
 
 
 const App = () => {
@@ -10,64 +11,56 @@ const App = () => {
   const [editingContact, setEditingContact] = useState(createEmptyContact());
 
   function createEmptyContact() {
-    return { 
-      id: null, 
-      fName: '', 
-      lName: '', 
-      email: '', 
-      phone: '' 
-    };
+    return { id: null, fName: '', lName: '', email: '', phone: '' };
   }
 
   useEffect(() => {
-    const contacts = JSON.parse(localStorage.getItem('contacts')) || [];
-    setContacts(contacts);
+    api.get('/')
+      .then(response => {
+        setContacts(response.data);
+      })
+      .catch(error => console.error('Error loading the contacts: ', error));
   }, []);
-
-  function saveContactsToLocalStorage(contacts) {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }
 
   const addNewContact = () => {
     setEditingContact(createEmptyContact());
-  }
+  };
 
   const selectContact = (contact) => {
     setEditingContact(contact);
-  }
-
-  const createContact = (newContact) => {
-    newContact.id = nanoid();
-    const updatedContacts = [...contacts, newContact];
-    saveContactsToLocalStorage(updatedContacts);
-    setContacts(updatedContacts);
-    setEditingContact(createEmptyContact());
-  }
-
-  const updateContact = (updatedContact) => {
-    const updatedContacts = contacts.map(c => c.id === updatedContact.id ? updatedContact : c);
-    saveContactsToLocalStorage(updatedContacts);
-    setContacts(updatedContacts);
-    setEditingContact(updatedContact);
-  }
-
-  const deleteContact = (id) => {
-    const updatedContacts = contacts.filter(c => c.id !== id);
-    setContacts(updatedContacts);
-    saveContactsToLocalStorage(updatedContacts);
-  }
+  };
 
   const saveContact = (contact) => {
-    if (!contact.id) {
-      createContact(contact);
+    if (contact.id) {
+      api.put(`/${contact.id}`, contact)
+        .then(response => {
+          const updatedContacts = contacts.map(c => c.id === contact.id ? response.data : c);
+          setContacts(updatedContacts);
+          setEditingContact(createEmptyContact());
+        })
+        .catch(error => console.error('Error updating the contact: ', error));
     } else {
-      updateContact(contact);
+      api.post('/', { ...contact, id: nanoid() })
+        .then(response => {
+          setContacts([...contacts, response.data]);
+          setEditingContact(createEmptyContact());
+        })
+        .catch(error => console.error('Error creating a new contact: ', error));
     }
-  }
+  };
+
+  const deleteContact = (id) => {
+    api.delete(`/${id}`)
+      .then(() => {
+        const updatedContacts = contacts.filter(c => c.id !== id);
+        setContacts(updatedContacts);
+      })
+      .catch(error => console.error('Error deleting the contact: ', error));
+  };
 
   return (
     <div className="project-container">
-      <h2>Contact list</h2>
+      <h2>Contact List</h2>
       <div className="wrapper">
         <List
           contacts={contacts}
@@ -76,7 +69,7 @@ const App = () => {
           onSelectContact={selectContact}
         />
         <Form
-          key={editingContact.id}
+          key={editingContact.id || 'new-contact'}
           editingContact={editingContact}
           onSave={saveContact}
           onDelete={deleteContact}
@@ -85,6 +78,6 @@ const App = () => {
       </div>
     </div>
   );
-}
+};
 
 export default App;
