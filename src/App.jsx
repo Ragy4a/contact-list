@@ -2,24 +2,32 @@ import { useState, useEffect } from 'react';
 import List from './components/List/List';
 import Form from './components/Form/Form';
 import './App.css';
-import { nanoid } from 'nanoid';
 import api from './api/contacts-service'
-
 
 const App = () => {
   const [contacts, setContacts] = useState([]);
   const [editingContact, setEditingContact] = useState(createEmptyContact());
 
   function createEmptyContact() {
-    return { id: null, fName: '', lName: '', email: '', phone: '' };
+    return { 
+      id: null, 
+      fName: '', 
+      lName: '', 
+      email: '', 
+      phone: '' 
+    };
   }
 
   useEffect(() => {
     api.get('/')
-      .then(response => {
-        setContacts(response.data);
+      .then(({ data }) => {
+        if (data.length > 0) {
+          setContacts(data);
+        } else {
+          console.log("No contacts found");
+        }
       })
-      .catch(error => console.error('Error loading the contacts: ', error));
+      .catch((error) => console.error('Error loading the contacts: ', error));
   }, []);
 
   const addNewContact = () => {
@@ -33,16 +41,16 @@ const App = () => {
   const saveContact = (contact) => {
     if (contact.id) {
       api.put(`/${contact.id}`, contact)
-        .then(response => {
-          const updatedContacts = contacts.map(c => c.id === contact.id ? response.data : c);
-          setContacts(updatedContacts);
+        .then(({ data }) => {
+          setContacts(prev => prev.map(item => item.id === data.id ? data : item));
           setEditingContact(createEmptyContact());
         })
         .catch(error => console.error('Error updating the contact: ', error));
     } else {
-      api.post('/', { ...contact, id: nanoid() })
-        .then(response => {
-          setContacts([...contacts, response.data]);
+      const newContact = { ...contact };
+      api.post('/', newContact)
+        .then(({ data }) => {
+          setContacts(prev => [...prev, data]);
           setEditingContact(createEmptyContact());
         })
         .catch(error => console.error('Error creating a new contact: ', error));
@@ -52,8 +60,8 @@ const App = () => {
   const deleteContact = (id) => {
     api.delete(`/${id}`)
       .then(() => {
-        const updatedContacts = contacts.filter(c => c.id !== id);
-        setContacts(updatedContacts);
+        const newContacts = contacts.filter(item => item.id !== id)
+        setContacts(newContacts);
       })
       .catch(error => console.error('Error deleting the contact: ', error));
   };
@@ -69,7 +77,6 @@ const App = () => {
           onSelectContact={selectContact}
         />
         <Form
-          key={editingContact.id || 'new-contact'}
           editingContact={editingContact}
           onSave={saveContact}
           onDelete={deleteContact}
